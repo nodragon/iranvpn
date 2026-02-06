@@ -1,0 +1,10 @@
+{
+  "paths": [
+    { "type": "psiphon", "server_list_url": "https://example.com/psiphon-servers.json" },
+    { "type": "conduit", "discovery_url": "https://conduit.psiphon.ca/discovery" }
+  ],
+  "sources": [
+    { "url": "https://primary.example.com/config.json", "label": "Primary" },
+    { "url": "https://mirror.example.com/config.json", "label": "Mirror" }
+  ]
+}

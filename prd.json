@@ -1,0 +1,124 @@
+{
+  "project": "Iran-Circumvention VPN",
+  "branchName": "ralph/bullet-proof-iran-vpn",
+  "description": "Bullet-proof improved VPN for Iran filtering evasion - multi-protocol fallback, zero-config, P2P volunteer relay",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Zero-config connection for general users",
+      "description": "As a non-technical user in Iran, I want to connect to the VPN with one tap/click so that I can access blocked social media, messaging, and news without configuring servers or importing configs.",
+      "acceptanceCriteria": [
+        "User can launch the app and tap Connect without any prior setup",
+        "App fetches server/config list automatically from decentralized or redundant sources",
+        "Connection establishes within 30 seconds under typical conditions",
+        "User sees clear Connected/Disconnected status",
+        "No user account or login required",
+        "Works on Android, iOS, Windows, macOS"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Automatic protocol fallback when path fails",
+      "description": "As a user in Iran, I want the VPN to automatically try the next working path when one fails so that I stay connected even when censorship blocks a specific protocol or server.",
+      "acceptanceCriteria": [
+        "Fallback engine tries paths in order: Psiphon direct -> Conduit P2P -> Xray/Rostam",
+        "Fallback activates within 15 seconds of path failure",
+        "User is notified of path switch (optional, non-intrusive)",
+        "Connection resumes without user intervention",
+        "Exponential backoff on repeated failures"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Advanced config import for power users",
+      "description": "As a power user or activist, I want to import VLESS, VMess, Trojan, or obfuscated WireGuard configs so that I can use self-hosted or third-party servers with full control.",
+      "acceptanceCriteria": [
+        "Support import of VLESS, VMess, Trojan configs (subscription URL or manual)",
+        "Support import of obfuscated WireGuard (Rostam-style) configs",
+        "Configs can be added alongside zero-config paths in fallback chain",
+        "User can reorder or disable individual paths",
+        "Config format validation with clear error messages"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Volunteer P2P station setup",
+      "description": "As a volunteer (diaspora or ally), I want to run a P2P relay station with minimal setup so that I can share bandwidth with users in Iran without complex configuration.",
+      "acceptanceCriteria": [
+        "One-click or minimal-step install for Conduit-style station",
+        "Works on Android (background), Windows, macOS (iOS planned)",
+        "Volunteers cannot see user traffic content (encrypted end-to-end)",
+        "Configurable bandwidth and battery limits",
+        "Clear status: number of connected users, throughput",
+        "Cure53 or equivalent security audit for P2P components"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Installer availability during outages",
+      "description": "As a user in Iran, I want to obtain the VPN installer and updates even when primary distribution sites are blocked so that I can install or update during shutdowns.",
+      "acceptanceCriteria": [
+        "At least 2 alternate distribution channels",
+        "Installers available via community-shareable links",
+        "Update mechanism does not depend on a single domain",
+        "Documentation includes pre-install recommendation"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "DNS poisoning mitigation",
+      "description": "As a user, I want DNS queries to be protected from poisoning so that I can resolve blocked domains correctly when connected.",
+      "acceptanceCriteria": [
+        "Integrate DNS-over-HTTPS (DoH) or equivalent when available",
+        "Graceful handling when DoT/DoH are blocked",
+        "No DNS leaks when VPN is connected",
+        "User option to choose DNS provider"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Modular protocol support for future evolution",
+      "description": "As a maintainer, I want a modular architecture so that new protocols can be added quickly when censorship tactics evolve.",
+      "acceptanceCriteria": [
+        "Protocol handlers are pluggable",
+        "OONI or Filter Watch-style measurement hooks",
+        "Documented protocol integration guide for contributors"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Legal disclaimer and operational security guidance",
+      "description": "As a user, I want clear information about legal risks and security best practices so that I can make informed decisions.",
+      "acceptanceCriteria": [
+        "In-app and documentation: legal disclaimer",
+        "Operational security recommendations",
+        "No encouragement of illegal activity",
+        "Localized (Persian) guidance where applicable"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}
