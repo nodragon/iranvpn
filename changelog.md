@@ -2,6 +2,18 @@
 
 All notable changes to this project are documented in this file.
 
+## [3.0.9] — 2026-02-08
+
+### Added
+
+- **docs/gofundme-campaign-draft.md:** GoFundMe-style campaign draft (pro version): researched Iran internet Jan–Feb 2026 (blackout, NIN, digital isolation, Psiphon/Conduit usage), full campaign text (title, tagline, problem, why now, solution, impact numbers, use of funds, who we are, disclaimer, CTA), and four Mermaid diagrams (situation, circumvention flow, use of funds, volunteer relay).
+
+### Fixed
+
+- **RostamPathRunner.kt:** Corrected import from `org.opensignalfoundation.iranvpn.PathConfig` to `org.opensignalfoundation.iranvpn.model.PathConfig` so Rostam path config resolves correctly.
+
+---
+
 ## [3.0.8] — 2026-02-06
 
 ### Changed

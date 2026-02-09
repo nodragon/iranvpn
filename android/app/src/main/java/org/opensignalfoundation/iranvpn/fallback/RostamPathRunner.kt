@@ -1,6 +1,6 @@
 package org.opensignalfoundation.iranvpn.fallback
 
-import org.opensignalfoundation.iranvpn.PathConfig
+import org.opensignalfoundation.iranvpn.model.PathConfig
 
 /**
  * PathRunner for RostamWG (obfuscated WireGuard).
