@@ -1,22 +1,17 @@
-- name: Install Android SDK
-  run: |
-    set -e
+name: Build APK
 
-    mkdir -p $HOME/android-sdk/cmdline-tools
-    cd $HOME/android-sdk
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
 
-    wget -O cmdline-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-    unzip cmdline-tools.zip
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    mv cmdline-tools cmdline-tools/latest
-
-    export ANDROID_HOME=$HOME/android-sdk
-    export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
-
-    yes | sdkmanager --licenses
-
-    sdkmanager \
-      "platform-tools" \
-      "platforms;android-34" \
-      "build-tools;34.0.0"
+      - name: Say Hello
+        run: echo "workflow is working"
