@@ -1,54 +1,22 @@
-name: Build Android APK
+- name: Install Android SDK
+  run: |
+    set -e
 
-on:
-  workflow_dispatch:
-  push:
-    branches: [ main ]
+    mkdir -p $HOME/android-sdk/cmdline-tools
+    cd $HOME/android-sdk
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+    wget -O cmdline-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    unzip cmdline-tools.zip
 
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y curl git unzip build-essential wget
+    mv cmdline-tools cmdline-tools/latest
 
-      - name: Install Rust
-        run: |
-          curl https://sh.rustup.rs -sSf | sh -s -- -y
-          source $HOME/.cargo/env
-          rustup target add aarch64-linux-android armv7-linux-androideabi
+    export ANDROID_HOME=$HOME/android-sdk
+    export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
 
-      - name: Install Android SDK
-        run: |
-          mkdir -p $HOME/android-sdk
-          cd $HOME/android-sdk
-          wget https://dl.google.com/android/repository/commandlinetools-linux.zip
-          unzip commandlinetools-linux.zip
+    yes | sdkmanager --licenses
 
-      - name: Build Rust core
-        run: |
-          chmod +x scripts/build-android-core.sh
-          ./scripts/build-android-core.sh
-
-      - name: Fetch tun2socks
-        run: |
-          chmod +x scripts/fetch-tun2socks-prebuilt.sh
-          ./scripts/fetch-tun2socks-prebuilt.sh
-
-      - name: Build APK
-        run: |
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleDebug
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-debug-apk
-          path: android/app/build/outputs/apk/debug/*.apk
+    sdkmanager \
+      "platform-tools" \
+      "platforms;android-34" \
+      "build-tools;34.0.0"
