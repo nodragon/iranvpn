@@ -1,44 +1,45 @@
-name: Build Android APK with Rust Core
+name: Build Android APK
 
 on:
-  workflow_dispatch:  # 手动触发，不用每次 push
+  workflow_dispatch:
+  push:
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Set up Java 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          cmdline-tools-version: 'latest'
-
-      - name: Install NDK
-        run: sdkmanager "ndk;26.1.10909125"
-
-      - name: Set up Rust
+      - name: Install dependencies
         run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+          sudo apt update
+          sudo apt install -y curl git unzip build-essential wget
+
+      - name: Install Rust
+        run: |
+          curl https://sh.rustup.rs -sSf | sh -s -- -y
+          source $HOME/.cargo/env
           rustup target add aarch64-linux-android armv7-linux-androideabi
-          cargo install cargo-ndk
+
+      - name: Install Android SDK
+        run: |
+          mkdir -p $HOME/android-sdk
+          cd $HOME/android-sdk
+          wget https://dl.google.com/android/repository/commandlinetools-linux.zip
+          unzip commandlinetools-linux.zip
 
       - name: Build Rust core
         run: |
-          # 强制锁定 android-activity 到 0.5.1（无 bug 版本）
-          cargo update -p android-activity --precise 0.5.1
-          cargo ndk -t aarch64-linux-android -t armv7-linux-androideabi build --release
-          mkdir -p android/app/src/main/jniLibs/arm64-v8a
-          mkdir -p android/app/src/main/jniLibs/armeabi-v7a
-          cp target/aarch64-linux-android/release/libiran_vpn_core.so android/app/src/main/jniLibs/arm64-v8a/
-          cp target/armv7-linux-androideabi/release/libiran_vpn_core.so android/app/src/main/jniLibs/armeabi-v7a/
+          chmod +x scripts/build-android-core.sh
+          ./scripts/build-android-core.sh
+
+      - name: Fetch tun2socks
+        run: |
+          chmod +x scripts/fetch-tun2socks-prebuilt.sh
+          ./scripts/fetch-tun2socks-prebuilt.sh
 
       - name: Build APK
         run: |
@@ -49,5 +50,5 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: iranvpn-complete
+          name: app-debug-apk
           path: android/app/build/outputs/apk/debug/*.apk
