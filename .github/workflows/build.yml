@@ -21,40 +21,30 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Install system dependencies
+      - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y wget unzip tar
 
-      - name: Setup Android SDK (FIXED VERSION)
+      - name: Setup Android SDK
         run: |
           set -e
-
-          echo "Installing Android SDK..."
 
           mkdir -p $ANDROID_SDK_ROOT
 
-          # 下载 cmdline-tools
           wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline.zip
 
-          # 解压到临时目录
           mkdir -p temp
           unzip -q cmdline.zip -d temp
 
-          # ⭐关键修复：只移动内容，不移动整个目录
           mkdir -p $ANDROID_SDK_ROOT/cmdline-tools/latest
           mv temp/cmdline-tools/* $ANDROID_SDK_ROOT/cmdline-tools/latest/
 
-          # 环境变量
           echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
           echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
 
-          echo "SDK setup done."
-
-      - name: Install Android platforms & build tools
+      - name: Accept licenses & install SDK packages
         run: |
-          set -e
-
           yes | sdkmanager --licenses
 
           sdkmanager \
@@ -62,14 +52,16 @@ jobs:
             "platforms;android-34" \
             "build-tools;34.0.0"
 
-      - name: Grant permission
-        run: chmod +x ./gradlew
+      - name: Make gradlew executable
+        run: chmod +x android/gradlew
 
       - name: Build Debug APK
-        run: ./gradlew clean assembleDebug
+        run: |
+          cd android
+          ./gradlew clean assembleDebug
 
-      - name: Upload APK artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          path: android/app/build/outputs/apk/debug/*.apk
