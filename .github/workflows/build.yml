@@ -26,15 +26,12 @@ jobs:
       - name: Install NDK
         run: sdkmanager "ndk;26.1.10909125"
 
-      - name: Set up Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          target: aarch64-linux-android, armv7-linux-androideabi
-          override: true
-
-      - name: Install cargo-ndk
-        run: cargo install cargo-ndk
+      - name: Install Rust and Android targets
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+          rustup target add aarch64-linux-android armv7-linux-androideabi
+          cargo install cargo-ndk
 
       - name: Build Rust core
         run: |
