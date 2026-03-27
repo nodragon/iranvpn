@@ -1,14 +1,11 @@
-name: Build Android APK
+name: Build Android APK with Rust Core
 
 on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
+  workflow_dispatch:  # 手动触发，不用每次 push
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
@@ -26,7 +23,7 @@ jobs:
       - name: Install NDK
         run: sdkmanager "ndk;26.1.10909125"
 
-      - name: Install Rust and Android targets
+      - name: Set up Rust
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
@@ -35,6 +32,8 @@ jobs:
 
       - name: Build Rust core
         run: |
+          # 强制锁定 android-activity 到 0.5.1（无 bug 版本）
+          cargo update -p android-activity --precise 0.5.1
           cargo ndk -t aarch64-linux-android -t armv7-linux-androideabi build --release
           mkdir -p android/app/src/main/jniLibs/arm64-v8a
           mkdir -p android/app/src/main/jniLibs/armeabi-v7a
@@ -50,5 +49,5 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug
+          name: iranvpn-complete
           path: android/app/build/outputs/apk/debug/*.apk
