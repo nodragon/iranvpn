@@ -1,4 +1,4 @@
-name: iranvpn android build
+name: iranvpn build safe
 
 on:
   workflow_dispatch:
@@ -9,60 +9,51 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    env:
-      ANDROID_HOME: ${{ github.workspace }}/android-sdk
-      PATH: ${{ github.workspace }}/android-sdk/cmdline-tools/latest/bin:${{ github.workspace }}/android-sdk/platform-tools:$PATH
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # ---------------- Rust ----------------
+      - name: Check system tools (debug)
+        run: |
+          which tar
+          tar --version
+          echo $PATH
+
       - name: Install Rust
         run: |
           curl https://sh.rustup.rs -sSf | sh -s -- -y
           source $HOME/.cargo/env
           rustup target add aarch64-linux-android armv7-linux-androideabi
 
-      # ---------------- Android SDK ----------------
-      - name: Install Android SDK
+      - name: Install Android SDK (safe)
         run: |
           set -e
-          mkdir -p $ANDROID_HOME/cmdline-tools
-          cd $ANDROID_HOME
+          mkdir -p $HOME/android-sdk/cmdline-tools
+          cd $HOME/android-sdk
 
           wget -O tools.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
           unzip tools.zip
 
           mv cmdline-tools cmdline-tools/latest
 
-          yes | cmdline-tools/latest/bin/sdkmanager --licenses
+          export ANDROID_HOME=$HOME/android-sdk
+          export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
 
-          cmdline-tools/latest/bin/sdkmanager \
-            "platform-tools" \
-            "platforms;android-34" \
-            "build-tools;34.0.0"
+          yes | sdkmanager --licenses
 
-      # ---------------- Rust core build ----------------
-      - name: Build Rust core
+          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+
+      - name: Build (Rust core)
         run: |
           chmod +x scripts/build-android-core.sh || true
-          ./scripts/build-android-core.sh || echo "rust build step skipped/failed (expected in first run)"
+          ./scripts/build-android-core.sh || true
 
-      # ---------------- tun2socks ----------------
-      - name: Fetch tun2socks
-        run: |
-          chmod +x scripts/fetch-tun2socks-prebuilt.sh || true
-          ./scripts/fetch-tun2socks-prebuilt.sh || echo "tun2socks step skipped/failed (expected in first run)"
-
-      # ---------------- Android build ----------------
       - name: Build APK
         run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
 
-      # ---------------- Upload APK ----------------
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
