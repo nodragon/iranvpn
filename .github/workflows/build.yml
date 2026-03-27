@@ -1,61 +1,66 @@
-name: iranvpn build safe
+name: Android CI Build
 
 on:
-  workflow_dispatch:
   push:
-    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      ANDROID_SDK_ROOT: ${{ github.workspace }}/android-sdk
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Check system tools (debug)
-        run: |
-          which tar
-          tar --version
-          echo $PATH
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
 
-      - name: Install Rust
+      - name: Install dependencies
         run: |
-          curl https://sh.rustup.rs -sSf | sh -s -- -y
-          source $HOME/.cargo/env
-          rustup target add aarch64-linux-android armv7-linux-androideabi
+          sudo apt-get update
+          sudo apt-get install -y wget unzip tar
 
-      - name: Install Android SDK (safe)
+      - name: Setup Android SDK
         run: |
           set -e
-          mkdir -p $HOME/android-sdk/cmdline-tools
-          cd $HOME/android-sdk
 
-          wget -O tools.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
-          unzip tools.zip
+          mkdir -p $ANDROID_SDK_ROOT
 
-          mv cmdline-tools cmdline-tools/latest
+          # 下载 cmdline-tools
+          wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O tools.zip
 
-          export ANDROID_HOME=$HOME/android-sdk
-          export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
+          mkdir -p tmp_sdk
+          unzip -q tools.zip -d tmp_sdk
 
+          mkdir -p $ANDROID_SDK_ROOT/cmdline-tools/latest
+          mv tmp_sdk/cmdline-tools/* $ANDROID_SDK_ROOT/cmdline-tools/latest/
+
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+          echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
+
+      - name: Accept licenses & install platforms
+        run: |
           yes | sdkmanager --licenses
 
-          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+          sdkmanager \
+            "platform-tools" \
+            "platforms;android-34" \
+            "build-tools;34.0.0"
 
-      - name: Build (Rust core)
-        run: |
-          chmod +x scripts/build-android-core.sh || true
-          ./scripts/build-android-core.sh || true
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
 
-      - name: Build APK
-        run: |
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleDebug
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: iranvpn-apk
-          path: android/app/build/outputs/apk/debug/*.apk
+          name: app-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
