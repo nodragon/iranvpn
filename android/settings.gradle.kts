@@ -23,6 +23,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "IranVPN"
 
-// ❗关键修复：你的 app 在 android/app
+// 🔥 关键修复点（必须是 android/app）
 include(":app")
-project(":app").projectDir = file("app")   // ← 如果app在android/app就改这里
+project(":app").projectDir = file("android/app")
