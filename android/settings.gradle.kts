@@ -23,6 +23,9 @@ dependencyResolutionManagement {
 
 rootProject.name = "IranVPN"
 
-// 🔥 关键修复点（必须是 android/app）
+/**
+ * ✅ 关键修复点：
+ * 不再写死 projectDir，避免 android/android/app 错误
+ * Gradle 会自动按 include(":app") 找 module
+ */
 include(":app")
-project(":app").projectDir = file("android/app")
