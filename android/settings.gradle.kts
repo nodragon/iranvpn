@@ -1,4 +1,3 @@
-
 pluginManagement {
     repositories {
         gradlePluginPortal()
@@ -19,13 +18,11 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-
-        // Psiphon (optional)
-        maven {
-            url = uri("https://raw.githubusercontent.com/Psiphon-Labs/psiphon-tunnel-core-Android-library/master")
-        }
     }
 }
 
 rootProject.name = "IranVPN"
+
+// ❗关键修复点：你的 app 在 android/app
 include(":app")
+project(":app").projectDir = file("app")
