@@ -1,4 +1,4 @@
-name: Android CI Build
+name: Android Build CI
 
 on:
   push:
@@ -11,6 +11,7 @@ jobs:
     env:
       ANDROID_SDK_ROOT: ${{ github.workspace }}/android-sdk
       ANDROID_HOME: ${{ github.workspace }}/android-sdk
+      GRADLE_OPTS: "-Xmx4g -Dfile.encoding=UTF-8"
 
     steps:
       - name: Checkout code
@@ -25,15 +26,11 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y wget unzip tar
+          sudo apt-get install -y wget unzip
 
-      - name: Setup Android SDK (CLEAN FIX)
+      - name: Setup Android SDK (fixed)
         run: |
           set -e
-
-          # ❗ 清掉系统自带 SDK 干扰
-          unset ANDROID_SDK_ROOT
-          unset ANDROID_HOME
 
           export ANDROID_SDK_ROOT=$GITHUB_WORKSPACE/android-sdk
           export ANDROID_HOME=$GITHUB_WORKSPACE/android-sdk
@@ -53,7 +50,7 @@ jobs:
 
           echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
 
-      - name: Accept licenses & install SDK
+      - name: Accept licenses & install SDK tools
         run: |
           yes | sdkmanager --licenses
 
@@ -62,16 +59,22 @@ jobs:
             "platforms;android-34" \
             "build-tools;34.0.0"
 
+      - name: Fix Gradle memory (IMPORTANT)
+        run: |
+          echo "org.gradle.jvmargs=-Xmx4g -Dfile.encoding=UTF-8" >> android/gradle.properties
+          echo "org.gradle.daemon=true" >> android/gradle.properties
+          echo "org.gradle.parallel=true" >> android/gradle.properties
+
       - name: Grant permission
         run: chmod +x android/gradlew
 
       - name: Build Debug APK
         run: |
           cd android
-          ./gradlew clean assembleDebug
+          ./gradlew clean assembleDebug --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug-apk
+          name: app-debug
           path: android/app/build/outputs/apk/debug/*.apk
